@@ -5,22 +5,17 @@ pipeline {
         timestamps()
         disableConcurrentBuilds()
         buildDiscarder(logRotator(numToKeepStr: '20'))
-        skipDefaultCheckout(true)
     }
 
     environment {
         APP_NAME = 'sample-pr-app'
-        SOURCE_DIR = '/Users/tapanbhoi/Documents/Container/jenkins_pr_relay_multibranch'
     }
 
     stages {
-        stage('Source') {
+        stage('Checkout') {
             steps {
-                sh '''
-                    set -eu
-                    test -f "${SOURCE_DIR}/Jenkinsfile"
-                    git -C "${SOURCE_DIR}" rev-parse --short HEAD
-                '''
+                checkout scm
+                sh 'git rev-parse --short HEAD'
             }
         }
 
@@ -38,7 +33,6 @@ pipeline {
             steps {
                 sh '''
                     set -eu
-                    cd "${SOURCE_DIR}"
                     python3 --version
                     PYTHONPYCACHEPREFIX=/tmp/jenkins-pr-relay-pycache python3 -m compileall relay tests scripts
                 '''
@@ -49,7 +43,6 @@ pipeline {
             steps {
                 sh '''
                     set -eu
-                    cd "${SOURCE_DIR}"
                     if [ -d .venv ]; then . .venv/bin/activate; fi
                     if python3 -m pytest --version >/dev/null 2>&1; then
                         python3 -m pytest -q
