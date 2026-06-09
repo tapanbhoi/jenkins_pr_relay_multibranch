@@ -38,6 +38,11 @@ Jenkins scans PR branch and runs Jenkinsfile
    - GitHub Branch Source, if the repository is hosted on GitHub
 
 2. Create a Jenkins credential for the Git repository.
+   - ID: `github-user-token`
+   - Kind: Username with password
+   - Username: your GitHub username
+   - Password: a GitHub PAT
+   - Required PAT permission: commit status read/write. For a classic PAT, use `repo:status` for public repositories or `repo` for private repositories. For a fine-grained PAT, grant repository access and `Commit statuses: Read and write`.
 
 3. Create a new Jenkins item:
    - Type: `Multibranch Pipeline`
