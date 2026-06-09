@@ -1,0 +1,22 @@
+services:
+  jenkins:
+    image: jenkins/jenkins:lts-jdk17
+    container_name: pr-relay-jenkins
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+
+  relay:
+    build: .
+    container_name: pr-relay-server
+    depends_on:
+      - jenkins
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+
+volumes:
+  jenkins_home:

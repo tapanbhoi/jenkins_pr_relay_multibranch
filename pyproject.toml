@@ -1,0 +1,22 @@
+[project]
+name = "jenkins-pr-relay-multibranch"
+version = "1.0.0"
+description = "Webhook relay server that receives PR events and triggers Jenkins multibranch pipelines."
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi==0.115.6",
+    "httpx==0.28.1",
+    "pydantic-settings==2.7.1",
+    "uvicorn[standard]==0.34.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.3.4",
+    "pytest-asyncio==0.25.2",
+    "respx==0.22.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
