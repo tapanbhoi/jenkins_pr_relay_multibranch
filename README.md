@@ -157,4 +157,9 @@ uvicorn relay.main:app --reload
 - Keep `WEBHOOK_SECRET` and `JENKINS_API_TOKEN` in a secret manager.
 - Use a Jenkins service account with only the permissions required to trigger the multibranch job.
 - Restrict inbound traffic to the relay where possible.
+<<<<<<< HEAD
 - Log delivery IDs and Jenkins queue URLs in a production implementation..
+=======
+- Log delivery IDs and Jenkins queue URLs in a production implementation.
+
+>>>>>>> edac094 (test PR)
