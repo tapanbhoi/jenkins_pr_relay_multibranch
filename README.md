@@ -38,6 +38,11 @@ Jenkins scans PR branch and runs Jenkinsfile
    - GitHub Branch Source, if the repository is hosted on GitHub
 
 2. Create a Jenkins credential for the Git repository.
+   - ID: `github-user-token`
+   - Kind: Username with password
+   - Username: your GitHub username
+   - Password: a GitHub PAT
+   - Required PAT permission: commit status read/write. For a classic PAT, use `repo:status` for public repositories or `repo` for private repositories. For a fine-grained PAT, grant repository access and `Commit statuses: Read and write`.
 
 3. Create a new Jenkins item:
    - Type: `Multibranch Pipeline`
@@ -152,4 +157,9 @@ uvicorn relay.main:app --reload
 - Keep `WEBHOOK_SECRET` and `JENKINS_API_TOKEN` in a secret manager.
 - Use a Jenkins service account with only the permissions required to trigger the multibranch job.
 - Restrict inbound traffic to the relay where possible.
+<<<<<<< HEAD
 - Log delivery IDs and Jenkins queue URLs in a production implementation..
+=======
+- Log delivery IDs and Jenkins queue URLs in a production implementation.
+
+>>>>>>> edac094 (test PR)

@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="860" viewBox="0 0 1320 860" role="img" aria-labelledby="title desc">
+  <title id="title">Jenkins PR Relay Multibranch End-to-End Flow</title>
+  <desc id="desc">Flowchart showing developer pull request, GitHub webhook, relay server, Jenkins multibranch pipeline, test execution, and GitHub PR status update.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="10" markerHeight="10" orient="auto-start-reverse">
+      <path d="M 1 1 L 11 6 L 1 11 z" fill="#2563eb"/>
+    </marker>
+    <style>
+      .page { fill: #f8fafc; }
+      .title { font: 700 34px Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 400 17px Arial, sans-serif; fill: #475569; }
+      .box { fill: #ffffff; stroke: #cbd5e1; stroke-width: 2; rx: 10; }
+      .box-blue { fill: #eff6ff; stroke: #60a5fa; }
+      .box-green { fill: #ecfdf5; stroke: #34d399; }
+      .box-yellow { fill: #fffbeb; stroke: #f59e0b; }
+      .box-red { fill: #fef2f2; stroke: #f87171; }
+      .box-purple { fill: #f5f3ff; stroke: #a78bfa; }
+      .label { font: 700 18px Arial, sans-serif; fill: #111827; }
+      .small { font: 400 14px Arial, sans-serif; fill: #475569; }
+      .tiny { font: 400 12px Arial, sans-serif; fill: #64748b; }
+      .lane-title { font: 700 17px Arial, sans-serif; fill: #334155; }
+      .line { stroke: #2563eb; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
+      .dashed { stroke-dasharray: 8 6; }
+      .note { fill: #0f172a; font: 700 15px Arial, sans-serif; }
+    </style>
+  </defs>
+
+  <rect class="page" x="0" y="0" width="1320" height="860"/>
+
+  <text class="title" x="60" y="60">Jenkins PR Relay Multibranch End-to-End Flow</text>
+  <text class="subtitle" x="60" y="90">Pull request event flows from GitHub to the relay server, triggers Jenkins, and reports pass/fail back to the GitHub PR.</text>
+
+  <rect class="box" x="40" y="125" width="1240" height="655" rx="18"/>
+
+  <text class="lane-title" x="85" y="160">Developer</text>
+  <text class="lane-title" x="285" y="160">GitHub Repository</text>
+  <text class="lane-title" x="535" y="160">Relay Server</text>
+  <text class="lane-title" x="765" y="160">Jenkins</text>
+  <text class="lane-title" x="1040" y="160">GitHub PR Page</text>
+
+  <line x1="235" y1="135" x2="235" y2="760" stroke="#e2e8f0" stroke-width="2"/>
+  <line x1="485" y1="135" x2="485" y2="760" stroke="#e2e8f0" stroke-width="2"/>
+  <line x1="715" y1="135" x2="715" y2="760" stroke="#e2e8f0" stroke-width="2"/>
+  <line x1="995" y1="135" x2="995" y2="760" stroke="#e2e8f0" stroke-width="2"/>
+
+  <rect class="box box-blue" x="70" y="195" width="140" height="82"/>
+  <text class="label" x="93" y="230">1. Push</text>
+  <text class="small" x="92" y="253">feature branch</text>
+
+  <rect class="box box-blue" x="70" y="330" width="140" height="82"/>
+  <text class="label" x="91" y="365">2. Raise PR</text>
+  <text class="small" x="90" y="388">branch to main</text>
+
+  <rect class="box box-green" x="270" y="195" width="175" height="82"/>
+  <text class="label" x="292" y="230">3. PR Event</text>
+  <text class="small" x="292" y="253">opened / updated</text>
+
+  <rect class="box box-green" x="270" y="330" width="175" height="96"/>
+  <text class="label" x="292" y="365">4. Webhook</text>
+  <text class="small" x="292" y="388">pull_request payload</text>
+  <text class="tiny" x="292" y="410">X-Hub-Signature-256</text>
+
+  <rect class="box box-yellow" x="520" y="310" width="160" height="138"/>
+  <text class="label" x="544" y="345">5. Relay API</text>
+  <text class="small" x="544" y="370">POST</text>
+  <text class="small" x="544" y="392">/webhooks/github</text>
+  <text class="tiny" x="544" y="418">validate signature</text>
+
+  <rect class="box box-yellow" x="520" y="500" width="160" height="95"/>
+  <text class="label" x="541" y="535">6. Trigger</text>
+  <text class="small" x="541" y="558">Jenkins scan</text>
+  <text class="tiny" x="541" y="580">or PR branch build</text>
+
+  <rect class="box box-purple" x="750" y="195" width="205" height="96"/>
+  <text class="label" x="777" y="230">7. Multibranch</text>
+  <text class="small" x="777" y="253">discovers branches</text>
+  <text class="small" x="777" y="274">and pull requests</text>
+
+  <rect class="box box-purple" x="750" y="340" width="205" height="110"/>
+  <text class="label" x="777" y="375">8. PR Job</text>
+  <text class="small" x="777" y="398">checkout PR head</text>
+  <text class="small" x="777" y="420">run Jenkinsfile</text>
+
+  <rect class="box box-purple" x="750" y="500" width="205" height="118"/>
+  <text class="label" x="777" y="535">9. Validate/Test</text>
+  <text class="small" x="777" y="558">compile Python code</text>
+  <text class="small" x="777" y="580">run pytest if present</text>
+  <text class="tiny" x="777" y="604">result: success/failure</text>
+
+  <rect class="box box-red" x="1030" y="315" width="205" height="125"/>
+  <text class="label" x="1054" y="350">10. Status API</text>
+  <text class="small" x="1054" y="373">pending / success</text>
+  <text class="small" x="1054" y="395">failure / error</text>
+  <text class="tiny" x="1054" y="420">uses github-user-token</text>
+
+  <rect class="box box-red" x="1030" y="500" width="205" height="118"/>
+  <text class="label" x="1054" y="535">11. PR Visible</text>
+  <text class="small" x="1054" y="558">developer sees</text>
+  <text class="small" x="1054" y="580">test pass/fail</text>
+  <text class="tiny" x="1054" y="604">reviewers can verify</text>
+
+  <path class="line" d="M 210 236 C 240 236 240 236 270 236"/>
+  <path class="line" d="M 140 277 C 140 300 140 305 140 330"/>
+  <path class="line" d="M 210 371 C 240 371 240 236 270 236"/>
+  <path class="line" d="M 357 277 C 357 300 357 306 357 330"/>
+  <path class="line" d="M 445 378 C 480 378 485 378 520 378"/>
+  <path class="line" d="M 600 448 C 600 470 600 478 600 500"/>
+  <path class="line" d="M 680 548 C 715 548 715 243 750 243"/>
+  <path class="line" d="M 852 291 C 852 315 852 318 852 340"/>
+  <path class="line" d="M 852 450 C 852 475 852 478 852 500"/>
+  <path class="line" d="M 955 559 C 1000 559 1000 378 1030 378"/>
+  <path class="line" d="M 1132 440 C 1132 468 1132 472 1132 500"/>
+
+  <rect class="box" x="70" y="680" width="1165" height="58" rx="12"/>
+  <text class="note" x="95" y="707">Important:</text>
+  <text class="small" x="172" y="707">PR builds appear under Jenkins Pull Requests. The main branch runs only after merge to main or direct push to main.</text>
+  <text class="small" x="172" y="729">For GitHub PR status visibility, Jenkins credential github-user-token must allow Commit statuses: Read and write.</text>
+</svg>
