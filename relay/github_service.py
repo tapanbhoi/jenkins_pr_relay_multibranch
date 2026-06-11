@@ -36,7 +36,7 @@ class GitHubService:
         state: str,
         description: str,
         target_url: str = "",
-        context: str = "Jenkins Pipeline",
+        context: str = "Jenkins pipeline result",
     ) -> None:
         """Update commit status on GitHub."""
         url = f"{self.base_url}/repos/{repo}/statuses/{sha}"

@@ -6,6 +6,7 @@ from relay.jenkins import JenkinsClient
 def settings(trigger_mode: str = "scan") -> Settings:
     return Settings(
         webhook_secret="super-secret",
+        github_token="github-token",
         jenkins_url="http://jenkins.example",
         jenkins_user="bot",
         jenkins_api_token="token",
