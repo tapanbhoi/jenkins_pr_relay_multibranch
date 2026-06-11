@@ -1,6 +1,6 @@
-# Jenkins PR Relay Multibranch Demo
+# Jenkins PR Relay Multibranch with PR Feedback
 
-This project demonstrates this flow:
+This project demonstrates a complete webhook relay flow with PR feedback:
 
 ```text
 Developer opens or updates PR
@@ -12,15 +12,32 @@ GitHub webhook sends pull_request event
 Relay server validates signature and filters PR action
         |
         v
+Relay server posts "pending" status to PR
+        |
+        v
 Relay server triggers Jenkins multibranch pipeline
         |
         v
-Jenkins scans PR branch and runs Jenkinsfile
+Relay server waits for Jenkins build to start
+        |
+        v
+Relay server posts PR comment with build URL
+        |
+        v
+Relay server polls Jenkins for build completion
+        |
+        v
+Relay server posts final status and result comment to PR
 ```
 
 ## What Is Included
 
-- `relay/`: FastAPI webhook relay server.
+- `relay/`: FastAPI webhook relay server with PR feedback functionality.
+  - `main.py`: Webhook endpoint and background task orchestration.
+  - `github.py`: GitHub webhook signature verification and PR event parsing.
+  - `github_service.py`: GitHub API client for posting PR comments and commit statuses.
+  - `jenkins.py`: Jenkins API client with polling for build results.
+  - `config.py`: Pydantic-based configuration management.
 - `Jenkinsfile`: Pipeline definition used by the multibranch job.
 - `jenkins/multibranch-job-dsl.groovy`: Jenkins Job DSL example for creating the multibranch job.
 - `Dockerfile`: Container image for the relay service.
@@ -54,7 +71,13 @@ You can also adapt `jenkins/multibranch-job-dsl.groovy` and run it from a Jenkin
    - API Token
    - Add new token
 
-5. Copy `.env.example` to `.env` and configure:
+5. Generate a GitHub Personal Access Token:
+   - Go to GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
+   - Click "Generate new token (classic)"
+   - Select scopes: `repo` (full control of private repositories)
+   - Copy the token (starts with `ghp_`)
+
+6. Copy `.env.example` to `.env` and configure:
 
 ```bash
 cp .env.example .env
@@ -64,11 +87,14 @@ Set:
 
 ```text
 WEBHOOK_SECRET=<same secret configured in the GitHub webhook>
+GITHUB_TOKEN=ghp_your_github_personal_access_token_here
 JENKINS_URL=http://jenkins:8080
 JENKINS_USER=<jenkins-user>
 JENKINS_API_TOKEN=<jenkins-api-token>
-JENKINS_MULTIBRANCH_JOB=<folder/job-name or job-name>
+JENKINS_MULTIBRANCH_JOB=torch-spyre
 JENKINS_TRIGGER_MODE=scan
+JENKINS_POLL_INTERVAL_SECONDS=10
+JENKINS_POLL_TIMEOUT_SECONDS=3600
 ```
 
 ## GitHub Webhook Setup
@@ -146,10 +172,89 @@ pytest -q
 uvicorn relay.main:app --reload
 ```
 
+## PR Feedback Features
+
+The relay server now provides complete feedback to GitHub PRs:
+
+1. **Commit Status Updates**: Posts "pending", "success", "failure", or "error" status to the PR commit
+2. **PR Comments**: Posts comments with:
+   - Initial trigger notification with build URL
+   - Final result with build status, duration, and link
+   - Error messages if relay fails
+3. **Background Processing**: Uses FastAPI BackgroundTasks to avoid blocking webhook responses
+4. **Jenkins Polling**: Monitors Jenkins queue and build status until completion
+
+### Example PR Comment
+
+When a PR is opened or updated, the relay posts:
+
+```markdown
+## 🚀 Jenkins Pipeline Triggered
+
+**Branch:** `feature-branch`
+**Commit:** `abc123def456`
+**Jenkins Build:** https://jenkins.example.com/job/torch-spyre/job/PR-123/1/
+
+Waiting for Jenkins result...
+```
+
+After completion:
+
+```markdown
+## ✅ Jenkins Pipeline Completed
+
+**Result:** SUCCESS
+**Branch:** `feature-branch`
+**Commit:** `abc123def456`
+**Duration:** 5 minutes
+**Jenkins Build:** https://jenkins.example.com/job/torch-spyre/job/PR-123/1/
+```
+
 ## Production Notes
 
 - Put the relay behind HTTPS.
-- Keep `WEBHOOK_SECRET` and `JENKINS_API_TOKEN` in a secret manager.
+- Keep `WEBHOOK_SECRET`, `GITHUB_TOKEN`, and `JENKINS_API_TOKEN` in a secret manager.
 - Use a Jenkins service account with only the permissions required to trigger the multibranch job.
+- Use a GitHub token with minimal required scopes (`repo` for private repos, `public_repo` for public repos).
 - Restrict inbound traffic to the relay where possible.
 - Log delivery IDs and Jenkins queue URLs in a production implementation.
+- Adjust `JENKINS_POLL_TIMEOUT_SECONDS` based on your typical build duration.
+
+
+## PR Feedback Features
+
+The relay server now provides complete feedback to GitHub PRs:
+
+1. **Commit Status Updates**: Posts "pending", "success", "failure", or "error" status to the PR commit
+2. **PR Comments**: Posts comments with:
+   - Initial trigger notification with build URL
+   - Final result with build status, duration, and link
+   - Error messages if relay fails
+3. **Background Processing**: Uses FastAPI BackgroundTasks to avoid blocking webhook responses
+4. **Jenkins Polling**: Monitors Jenkins queue and build status until completion
+
+### Example PR Comment
+
+When a PR is opened or updated, the relay posts:
+
+```markdown
+## 🚀 Jenkins Pipeline Triggered
+
+**Branch:** `feature-branch`  
+**Commit:** `abc123def456`  
+**Jenkins Build:** https://jenkins.example.com/job/torch-spyre/job/PR-123/1/
+
+Waiting for Jenkins result...
+```
+
+After completion:
+
+```markdown
+## ✅ Jenkins Pipeline Completed
+
+**Result:** SUCCESS  
+**Branch:** `feature-branch`  
+**Commit:** `abc123def456`  
+**Duration:** 5 minutes  
+**Jenkins Build:** https://jenkins.example.com/job/torch-spyre/job/PR-123/1/
+```

@@ -13,6 +13,9 @@ class Settings(BaseSettings):
     webhook_provider: Literal["github"] = "github"
     webhook_secret: str = Field(..., min_length=8)
 
+    # GitHub API configuration for posting PR feedback
+    github_token: str = Field(..., description="GitHub Personal Access Token with repo scope")
+
     jenkins_url: str = Field(..., description="Base Jenkins URL, for example http://jenkins:8080")
     jenkins_user: str
     jenkins_api_token: str
@@ -24,6 +27,16 @@ class Settings(BaseSettings):
     jenkins_branch_job_prefix: str = "PR-"
     jenkins_verify_tls: bool = True
     request_timeout_seconds: int = 20
+
+    # Jenkins polling configuration for monitoring build results
+    jenkins_poll_interval_seconds: int = Field(
+        default=10,
+        description="How often to poll Jenkins for build status (seconds)",
+    )
+    jenkins_poll_timeout_seconds: int = Field(
+        default=3600,
+        description="Maximum time to wait for build completion (seconds)",
+    )
 
 
 @lru_cache
