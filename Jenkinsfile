@@ -12,7 +12,7 @@ def notifyGitHubStatus(String state, String description) {
         withEnv([
             "GH_STATE=${state}",
             "GH_DESCRIPTION=${description}",
-            "GH_CONTEXT=Jenkins PR pipeline",
+            "GH_CONTEXT=Jenkins pipeline result",
             "GH_TARGET_URL=${env.BUILD_URL ?: ''}",
             "GH_COMMIT=${env.GIT_COMMIT}",
             "GH_CHANGE_ID=${env.CHANGE_ID ?: ''}",
@@ -136,7 +136,7 @@ pipeline {
         success {
             echo 'Pipeline succeeded'
             script {
-                notifyGitHubStatus('success', 'Jenkins pipeline passed')
+                notifyGitHubStatus('success', 'Jenkins pipeline success')
             }
         }
         failure {
@@ -148,13 +148,13 @@ pipeline {
         unstable {
             echo 'Pipeline unstable'
             script {
-                notifyGitHubStatus('failure', 'Jenkins pipeline is unstable')
+                notifyGitHubStatus('failure', 'Jenkins pipeline unstable')
             }
         }
         aborted {
             echo 'Pipeline aborted'
             script {
-                notifyGitHubStatus('error', 'Jenkins pipeline was aborted')
+                notifyGitHubStatus('error', 'Jenkins pipeline aborted')
             }
         }
     }
