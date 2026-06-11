@@ -75,6 +75,63 @@ PY
     }
 }
 
+def postGitHubPrComment(String result) {
+    if (!env.CHANGE_ID?.trim()) {
+        echo "Skipping GitHub PR comment because this is not a pull request build."
+        return
+    }
+
+    withCredentials([usernamePassword(
+        credentialsId: 'github-user-token',
+        usernameVariable: 'GITHUB_USER',
+        passwordVariable: 'GITHUB_TOKEN'
+    )]) {
+        withEnv([
+            "GH_RESULT=${result}",
+            "GH_BUILD_URL=${env.BUILD_URL ?: ''}",
+            "GH_CHANGE_ID=${env.CHANGE_ID}",
+            "GH_REPOSITORY=tapanbhoi/jenkins_pr_relay_multibranch"
+        ]) {
+            sh '''
+                set +x
+                python3 - <<'PY'
+import json
+import os
+import sys
+import urllib.request
+
+repo = os.environ["GH_REPOSITORY"]
+change_id = os.environ["GH_CHANGE_ID"]
+build_url = os.environ["GH_BUILD_URL"]
+result = os.environ["GH_RESULT"]
+url = f"https://api.github.com/repos/{repo}/issues/{change_id}/comments"
+body = f"""## Jenkins Pipeline Completed
+
+**Result:** {result}
+**Jenkins Build:** {build_url}
+"""
+request = urllib.request.Request(
+    url,
+    data=json.dumps({"body": body}).encode("utf-8"),
+    headers={
+        "Authorization": f"Bearer {os.environ['GITHUB_TOKEN']}",
+        "Accept": "application/vnd.github+json",
+        "Content-Type": "application/json",
+    },
+    method="POST",
+)
+try:
+    with urllib.request.urlopen(request, timeout=20) as response:
+        print(f"GitHub PR comment created: {response.status}")
+except Exception as exc:
+    print(f"GitHub PR comment failed: {exc}", file=sys.stderr)
+    sys.exit(0)
+PY
+            '''
+        }
+    }
+}
+
 pipeline {
     agent any
 
@@ -142,24 +199,28 @@ pipeline {
             echo 'Pipeline succeeded'
             script {
                 notifyGitHubStatus('success', 'Jenkins pipeline success')
+                postGitHubPrComment('SUCCESS')
             }
         }
         failure {
             echo 'Pipeline failed'
             script {
                 notifyGitHubStatus('failure', 'Jenkins pipeline failed')
+                postGitHubPrComment('FAILURE')
             }
         }
         unstable {
             echo 'Pipeline unstable'
             script {
                 notifyGitHubStatus('failure', 'Jenkins pipeline unstable')
+                postGitHubPrComment('UNSTABLE')
             }
         }
         aborted {
             echo 'Pipeline aborted'
             script {
                 notifyGitHubStatus('error', 'Jenkins pipeline aborted')
+                postGitHubPrComment('ABORTED')
             }
         }
     }
