@@ -63,6 +63,8 @@ Relay server posts final status and result comment to PR
    - Discover pull requests: enabled
    - Script path: `Jenkinsfile`
 
+Jenkins stores discovered pull request jobs as `PR-<number>` internally, for example `PR-5`. Depending on the GitHub Branch Source plugin metadata, the Pull Requests table can show the GitHub PR title as the display name, while the job URL and full project name remain `PR-<number>`.
+
 You can also adapt `jenkins/multibranch-job-dsl.groovy` and run it from a Jenkins seed job to create the multibranch pipeline automatically.
 
 4. Create a Jenkins API token for the relay user:

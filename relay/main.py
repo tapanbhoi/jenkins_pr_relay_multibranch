@@ -33,7 +33,7 @@ async def run_jenkins_and_report(
             repo=event.repo_full_name,
             sha=event.commit_sha,
             state="pending",
-            description="Jenkins pipeline triggered",
+            description="Jenkins pipeline is running",
             target_url="",
         )
 
@@ -72,7 +72,7 @@ Waiting for Jenkins result...
             repo=event.repo_full_name,
             sha=event.commit_sha,
             state=state,
-            description=f"Jenkins result: {jenkins_result}",
+            description=f"Jenkins pipeline {jenkins_result.lower()}",
             target_url=build_url,
         )
 
@@ -108,7 +108,7 @@ Waiting for Jenkins result...
             repo=event.repo_full_name,
             sha=event.commit_sha,
             state="error",
-            description="Relay server failed to trigger or monitor Jenkins",
+            description="Jenkins pipeline relay failed",
             target_url="",
         )
 
