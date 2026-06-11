@@ -1,4 +1,9 @@
 def notifyGitHubStatus(String state, String description) {
+    if (!env.CHANGE_ID?.trim()) {
+        echo "Skipping GitHub PR status update because this is not a pull request build."
+        return
+    }
+
     if (!env.GIT_COMMIT?.trim()) {
         echo "Skipping GitHub status update because GIT_COMMIT is not available yet."
         return
